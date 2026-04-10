@@ -1,7 +1,7 @@
 import streamlit as st
 import re
 import time
-from maze_solver import solve_maze_bfs
+from maze_solver import solve_maze_bfs, solve_maze_dfs, solve_maze_astar
 
 st.title("Visualizador de Algoritmo de Búsqueda en Laberinto")
 
@@ -54,7 +54,7 @@ st.sidebar.subheader("Carga el laberinto")
 st.sidebar.caption("1=pared, 0=camino, 2=inicio, 3=final")
 
 archivo = st.sidebar.file_uploader("", type=["txt"])
-algorithm = st.sidebar.selectbox("Selecciona algoritmo", ["BFS", "DFS en proceso", "A* en proceso"])
+algorithm = st.sidebar.selectbox("Selecciona algoritmo", ["BFS", "DFS", "A*"])
 solve_button = st.sidebar.button("Resolver Laberinto Cargado")
 
 # Main
@@ -70,18 +70,21 @@ if archivo:
             render_maze(maze, start, end)
 
         if solve_button:
-            if algorithm == "BFS":
-                t0 = time.time()
-                path, casillas = solve_maze_bfs(maze, start, end)
-                elapsed = time.time() - t0
+            t0 = time.time()
 
-                if path:
-                    st.success(f"BFS resuelto en {elapsed:.6f} s | Pasos: {casillas}")
-                    render_maze(maze, start, end, path)
-                else:
-                    st.error("No se encontró una ruta válida.")
+            if algorithm == "BFS":
+                path, casillas = solve_maze_bfs(maze, start, end)
+            elif algorithm == "DFS":
+                path, casillas = solve_maze_dfs(maze, start, end)
+            elif algorithm == "A*":
+                path, casillas = solve_maze_astar(maze, start, end)
+
+            elapsed = time.time() - t0
+
+            if path:
+                st.success(f"{algorithm} resuelto en {elapsed:.6f} s | Pasos: {casillas}")
+                render_maze(maze, start, end, path)
             else:
-                st.info(f"{algorithm}: funcionalidad aún no implementada.")
-                render_maze(maze, start, end)
+                st.error("No se encontró una ruta válida.")
 else:
     st.info("Esperando archivo...")
